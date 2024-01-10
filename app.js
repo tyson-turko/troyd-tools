@@ -4,6 +4,7 @@ const axios = require('axios')
 const bodyParser = require("body-parser")
 const fs = require('fs')
 const fsExtra = require('fs-extra');
+//const sharp = require('sharp')
 
 const ffmpeg = require('ffmpeg');
 const tesseract = require("node-tesseract-ocr");
@@ -66,6 +67,9 @@ function parseVideo(){
   var exec = require('child_process').exec;
   var __dir = 'assets/videos/';
   var file = 'video2.mp4';
+
+
+  // calculate FPS of video, adjust ratio 
 
 
   fsExtra.emptyDirSync('assets/img/frames');
@@ -185,6 +189,9 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
             matchActiveStatus = true;
             matchObject.frame_start = frameCount;          
             matchObject.map = 'Shipyard Compact';
+
+            
+
             console.log('Found Battle Start in file: '+dirent.name, matchObject);
             return;
             }
@@ -291,17 +298,25 @@ function cutVideos(matchObjects)
     
       var __dir = 'assets/videos/';
     
-      var cmd = 'ffmpeg -ss '+start+' -to '+end+' -i '+__dir+'video2.mp4 -c copy '+__dir+'output_'+index+'.mp4';
-      //var cmd = 'ffmpeg -i videos/videotest.mp4 -vf "fps=0.5" -q:v 1 -vf format=gray img/frames/%d.jpg';
+     /*  var cmd = 'ffmpeg -ss '+start+' -to '+end+' -i '+__dir+'video2.mp4 -c copy '+__dir+'output_'+index+'.mp4'; // cut video
       var exec = require('child_process').exec;
       exec(cmd, function(err, stdout, stderr) {
         if (err) console.log('err:\n' + err);
         if (stderr) console.log('stderr:\n' + stderr);
         console.log('stdout:\n' + stdout); 
-        });
+        }); */
     
 
-    
+        var cmd = 'ffmpeg -ss '+start+' -i '+__dir+'video2.mp4  -frames:v 1 -q:v 1 '+__dir+'output_'+index+'_thumbnail_raw.png'; // potential thumbnail for match up
+        var exec = require('child_process').exec;
+        exec(cmd, function(err, stdout, stderr) {
+          if (err) console.log('err:\n' + err);
+          if (stderr) console.log('stderr:\n' + stderr);
+          console.log('stdout:\n' + stdout); 
+          });
+      
+
+
   });
 
   
