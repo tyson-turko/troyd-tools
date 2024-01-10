@@ -1,0 +1,36 @@
+Task 1:  
+
+Route Audio in OBS  
+
+
+Task 2: 
+
+download twitch stream // last stream recording ( real time? )
+
+- iterate through until a mecha or coh3 match event occurs  (pizels on certain part of the screen)
+- creates video cut
+- identifies match particpants (OCR probably)
+- match end screen
+- create video cut
+- saves the cut file to drive with associative descriptors. 
+
+
+2b: 
+
+- MMR info into description
+
+
+Task 3: 
+
+Seperate Process
+
+- uploads file to youtube & twitch(?) as private with relevant descriptors
+- automated thumbnail experimentation
+
+
+Task 4: 
+
+auto scheduler of private videos
+
+
+Troyd Land: Local Web Interface to Control probably. 

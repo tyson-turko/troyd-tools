@@ -1,0 +1,22 @@
+Channel IDs for linking Streams in Discord on Twitch
+
+
+Generic
+
+409395771083980800
+536634128171401247
+636313449206644746
+529042015128649738
+507545362521915402
+
+Conditional Games
+
+CnC 
+378048477873176587
+
+
+
+
+Reddit 
+
+straem threads?
