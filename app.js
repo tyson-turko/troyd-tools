@@ -55,13 +55,15 @@ Input is Stream, Output is Match Videos
 
 1. detect that a stream file is present and not processed, get frame rate
 2. Parse data dump from OBS to detect what game is liklely in the stream
+
 3. PreProcess into images every n seconds, gray scale inverted.
 4. Detect Start and End point of each game
 5. Create video file for each
+
 6. Copyright free (music?) overlaid.
 7. Generate Thumbnail
 8. Upload Funcationality for Youtube, Twitch & Kick?
-9. Delete source video
+9. Delete source video, move files to a queue folder
 
 */
 
