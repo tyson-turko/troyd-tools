@@ -4,8 +4,11 @@ const axios = require('axios')
 const bodyParser = require("body-parser")
 const fs = require('fs')
 const fsExtra = require('fs-extra');
-//const sharp = require('sharp')
+require('dotenv').config();
 
+
+
+const sharp = require('sharp');
 const ffmpeg = require('ffmpeg');
 const tesseract = require("node-tesseract-ocr");
 // Initialize express and define a port
@@ -20,6 +23,9 @@ const PORT = 3000
 const routes = require('./src/routes/api'); 
 
 
+const streamVideoDirectory = 'D:/stream_recordings/';
+
+
 app.use(express.json());
 app.use('/', routes); //to use the routes
 
@@ -28,12 +34,8 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 })
 
 /* const Discord = require('discord.js')
-const DiscordToken = "MTQxNzE0NjkwNDc5NzUxMTY5.XXugOQ.b5lIzrh6wV8vBLDxcYlYoh_AYkI"
+const DiscordToken = process.env.DiscodToken;
 const client = new Discord.Client() */
-
-
-const twitchAppClientID = 'oe7dfk1ar1tgh3f19gou6sw7kcskuf';
-const twitchAppSecret = '70yh810aoychwzpxn17xfx01csvmq8';
 
 
 
@@ -62,11 +64,11 @@ Input is Stream, Output is Match Videos
 
 //ffmpeg  -i "video.mp4" -r 1 -loop 1 -i image.png -an -filter_complex "blend=difference:shortest=1,blackframe=90:32" -f null -     matches or an image
 
-function parseVideo(){
+function parseVideo(videoFilename){
 
   var exec = require('child_process').exec;
-  var __dir = 'assets/videos/';
-  var file = 'video2.mp4';
+  var __dir = 'D:/stream_recordings/';
+  var file = videoFilename; 
 
 
   // calculate FPS of video, adjust ratio 
@@ -171,8 +173,7 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
 
        var frameCount = Math.floor(parseFloat(dirent.name.replace(/\.[^/.]+$/, ""))/0.3333);
 
-        if(!matchActiveStatus)
-        {
+      
       
           if(text.includes("BATTLE STARTING")){
 
@@ -180,6 +181,7 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
                   number: 0,
                   frame_start: null,
                   frame_end:null,
+
                   map: null,
                   victory: false,   
                   players:[{name:'Troyd'}]
@@ -193,11 +195,9 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
             
 
             console.log('Found Battle Start in file: '+dirent.name, matchObject);
-            return;
+         
             }
-            
-
-        }
+        
 
         if(matchActiveStatus && (frameCount >= matchObject.frame_start + matchProcessingSettings.minimumFramesBeforeStateSwitch))
         {
@@ -240,74 +240,99 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
 
 
 
-var testMatches = [{
-  number: 1,
-  frame_start: 1338,
-  frame_end: 2295,
-  map: 'Shipyard Compact',
-  victory: true,
-},
-{
-  number: 2,
-  frame_start: 2331,
-  frame_end: 4002,
-  map: 'Shipyard Compact',
-  victory: true,
-},
-{
-  number: 3,
-  frame_start: 4080,
-  frame_end: 5490,
-  map: 'Shipyard Compact',
-  victory: true,
-},
-{
-  number: 4,
-  frame_start: 5529,
-  frame_end: 7065,
-  map: 'Shipyard Compact',
-  victory: false,
-},
-{
-  number: 5,
-  frame_start: 7161,
-  frame_end: 8358,
-  map: 'Shipyard Compact',
-  victory: false,
-},
-{
-  number: 6,
-  frame_start: 8385,
-  frame_end: 10303,
-  map: 'Shipyard Compact',
-  victory: true,
-}
+var testMatches = [
+  {
+    number: 1,
+    frame_start: 360,
+    frame_end: 1131,
+    map: 'Shipyard Compact',
+    victory: false,
+  },
+  {
+    number: 2,
+    frame_start: 1155,
+    frame_end: 2064,
+    map: 'Shipyard Compact',
+    victory: true,
+  },
+  {
+    number: 3,
+    frame_start: 2127,
+    frame_end: 3186,
+    map: 'Shipyard Compact',
+    victory: true,
+  },
+  {
+    number: 4,
+    frame_start: 3204,
+    frame_end: 4383,
+    map: 'Shipyard Compact',
+    victory: false,
+  },
+  {
+    number: 5,
+    frame_start: 4413,
+    frame_end: 5736,
+    map: 'Shipyard Compact',
+    victory: false,
+  },
+  {
+    number: 6,
+    frame_start: 5847,
+    frame_end: 7137,
+    map: 'Shipyard Compact',
+    victory: false,
+  },
+  {
+    number: 7,
+    frame_start: 7176,
+    frame_end: 8328,
+    map: 'Shipyard Compact',
+    victory: false,
+  },
+  {
+    number: 8,
+    frame_start: 8370,
+    frame_end: 9423,
+    map: 'Shipyard Compact',
+    victory: true,
+  },
+  {
+    number: 9,
+    frame_start: 9444,
+    frame_end: 10306,
+    map: 'Shipyard Compact',
+    victory: false,
+  }
 ]
 
 
-function cutVideos(matchObjects)
+function cutVideos(matchObjects,videoFilename)
 {
 
   matchObjects.forEach(function (match,index) {
 
-
+    if(match.frame_end)
+    {
+ 
       var start = new Date((match.frame_start-1)  * 1000).toISOString().substring(11, 19);
       var end = new Date((match.frame_end)  * 1000).toISOString().substring(11, 19);
     
       console.log(start,end);
     
-      var __dir = 'assets/videos/';
+      var __dir = process.env.streamVideoDirectory+'/';
+      var __dirOutput = 'assets/videos/';
     
-     /*  var cmd = 'ffmpeg -ss '+start+' -to '+end+' -i '+__dir+'video2.mp4 -c copy '+__dir+'output_'+index+'.mp4'; // cut video
+       /* var cmd = 'ffmpeg -ss '+start+' -to '+end+' -i "'+__dir+videoFilename+'" -c copy '+__dirOutput+'output_'+index+'.mp4'; // cut video
       var exec = require('child_process').exec;
       exec(cmd, function(err, stdout, stderr) {
         if (err) console.log('err:\n' + err);
         if (stderr) console.log('stderr:\n' + stderr);
         console.log('stdout:\n' + stdout); 
-        }); */
-    
+        }); 
+     */
 
-        var cmd = 'ffmpeg -ss '+start+' -i '+__dir+'video2.mp4  -frames:v 1 -q:v 1 '+__dir+'output_'+index+'_thumbnail_raw.png'; // potential thumbnail for match up
+        var cmd = 'ffmpeg -ss '+start+' -i "'+__dir+videoFilename+'" -frames:v 1 -q:v 1 '+__dirOutput+'output_'+index+'_'+match.victory+'_thumbnail_raw.png'; // potential thumbnail for match up
         var exec = require('child_process').exec;
         exec(cmd, function(err, stdout, stderr) {
           if (err) console.log('err:\n' + err);
@@ -316,7 +341,7 @@ function cutVideos(matchObjects)
           });
       
 
-
+        }
   });
 
   
@@ -326,11 +351,38 @@ function cutVideos(matchObjects)
 }
 
 
+function thumbnailCreationMechaBellum()
+{
+  var __dirOutput = 'assets/videos/';
+
+  
+  const dir = fs.opendirSync(__dirOutput)
+  let dirent
+  while ((dirent = dir.readSync()) !== null) {
+    if(dirent.name.includes('raw'))
+    {
+       sharp('assets/videos/'+dirent.name)
+      .extract({ left: 410, top: 315, width: 1100, height: 580 })
+      .resize(1280,720)
+      .toFile("assets/videos/"+dirent.name.replace(/\.[^/.]+$/, "").replace('_raw','')+".png")
+      .then(() => {
+        console.log(dirent);
+        //    fs.unlink('assets/videos/'+dirent.name);
+      });
+    }
+  }
+  dir.closeSync()
+    
+
+}
 
 
 
-cutVideos(testMatches);
-//parseVideo();
-//parseProcessedImagesMechabellumStart();
-//parseSingleImageText('000406.jpg');
 
+filename = "2024-01-10.mp4";
+
+parseVideo(filename);  // on complete rn next two commands
+
+//var parsedMatchObjects = parseProcessedImagesMechabellumStart();
+//cutVideos(parsedMatchObjects,filename);
+//thumbnailCreationMechaBellum();
