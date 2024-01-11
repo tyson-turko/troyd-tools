@@ -5,12 +5,10 @@ const bodyParser = require("body-parser")
 const fs = require('fs')
 const fsExtra = require('fs-extra');
 require('dotenv').config();
-
-
-
 const sharp = require('sharp');
 const ffmpeg = require('ffmpeg');
-const tesseract = require("node-tesseract-ocr");
+//const tesseract = require("node-tesseract-ocr");
+const tesseract = require('tesseract.js');
 // Initialize express and define a port
 
 /* Express Stuff */
@@ -20,10 +18,10 @@ const express = require("express")
 const app = express()
 const PORT = 3000
 
+
+/** Controllers **/
+
 const routes = require('./src/routes/api'); 
-
-
-const streamVideoDirectory = 'D:/stream_recordings/';
 
 
 app.use(express.json());
@@ -40,6 +38,13 @@ const client = new Discord.Client() */
 
 
 const gameRegistry = ['mechabellum','coh3'];
+
+const coh3 = require("./src/methods/coh3.js");
+const video = require("./src/methods/video.js");
+const youtube = require("./src/methods/youtube.js");
+const { stringify } = require('querystring');
+
+youtube.test();
 
 
 /////// 
@@ -61,71 +66,65 @@ Input is Stream, Output is Match Videos
 */
 
 
+const videoObject = {
+
+  title: 'test',
+  description: 'Test test test',
+  tags:['test','test','test4'],
+  videoFilePath:'assets/videos/output_0.mp4',
+  thumbFilePath:'assets/videos/output_0_true_thumbnail_raw.png',
+  publish_at: null,
+
+};
+
+//workFlow
+  
+      //get filename = 'CoH3 2v2 _ Ranked Matches 2024-01-04.mp';
+      // video.parseVideo('CoH3 2v2 _ Ranked Matches 2024-01-04.mp4');  
+
+      // Cut my videos and collect information
+     /*  var result =   coh3.identifyMatchesFromStreamImages().then(function(result){
+        video.cutMatchVideos(result,'CoH3 2v2 _ Ranked Matches 2024-01-04.mp4');
+        //coh3.modifyThumbnails();
+      }); */
+
+
+    //  console.log('Function did not wait', result);
+     // 
+      //console.log('On thingy');
+      //youtube.uploadVideo(videoObject)
+      coh3.uploadVideostoYoutube();
+
+ //   parseSingleImageText('000048.jpg');
 
 //ffmpeg  -i "video.mp4" -r 1 -loop 1 -i image.png -an -filter_complex "blend=difference:shortest=1,blackframe=90:32" -f null -     matches or an image
-
-function parseVideo(videoFilename){
-
-  var exec = require('child_process').exec;
-  var __dir = 'D:/stream_recordings/';
-  var file = videoFilename; 
-
-
-  // calculate FPS of video, adjust ratio 
-
-
-  fsExtra.emptyDirSync('assets/img/frames');
-  var cmd = 'ffmpeg -i "'+__dir+file+'" -q:v 1 -vf format=gray,fps=0.33333,lutyuv="y=negval:u=negval:v=negval" assets/img/frames/%06d.jpg';
-  //var cmd = 'ffmpeg -i videos/videotest.mp4 -vf "fps=0.5" -q:v 1 -vf format=gray img/frames/%d.jpg';
-
-  exec(cmd, function(err, stdout, stderr) {
-    if (err) console.log('err:\n' + err);
-    if (stderr) console.log('stderr:\n' + stderr);
-    console.log('stdout:\n' + stdout);
-});
-  console.log('I am finished?');
-
-
-}
-
 
 async function parseSingleImageText(filename)
 {
 
 
-  const config = {
-    lang: "eng",
-    //psm: 5,
-    oem: 3
-  }
+  const { createWorker } = require('tesseract.js');
 
-  //const rectangle =  { left: 399, top: 300, width: 1100, height: 550 };
-  //const rectangle =  { left: 399, top: 380, width: 478, height: 133 };
-  const rectangle = { left: 0, top: 0, width: 500, height: 250 };
-
-  var result = await tesseract
-  .recognize("assets/img/frames/"+filename, {  })
-  .then((text) => {
-   console.log("\n\nResult from: "+filename, text)
-
-    //check for text, build out match model
- 
-    if(text.includes("VICTORY")){
-      console.log('Found Battle End in file:');
-      
-      return;
-      }
-    return false;
-    //console.log(text);
-
-  })
+  const worker = await createWorker('eng');
+  //coh3 rectangles
+  const rectangle = { left: 400, top: 40, width: 251, height: 108 };  // Team 1
+  //const rectangle2 = { left: 769, top: 45, width: 251, height: 108 };  // Team 2
+  //const rectangle = { left: 524, top: 224, width: 236, height: 30 };  // Team 2
   
-  .catch((error) => {
-    console.log(error.message)
-  })
+  var result = await (async () => {
+    const { data: { text } } = await worker.recognize('assets/img/frames/'+filename, { rectangle }); // has to be called rectangle
+    console.log(text.split('\n'));
+
+      
+
+    console.log(team1);
+
+
+    
+    await worker.terminate();
+  })();
 
   console.log(result);
-
 
 
   
@@ -144,8 +143,6 @@ var matchObjectDefault = {
 const matchProcessingSettings = {
   minimumFramesBeforeStateSwitch: 5,
 }
-
-var matchObjects = [];
 
 
 
@@ -240,115 +237,54 @@ async function parseProcessedImagesMechabellumStart()   ///Mechabellum Prototype
 
 
 
-var testMatches = [
-  {
-    number: 1,
-    frame_start: 360,
-    frame_end: 1131,
-    map: 'Shipyard Compact',
-    victory: false,
-  },
-  {
-    number: 2,
-    frame_start: 1155,
-    frame_end: 2064,
-    map: 'Shipyard Compact',
-    victory: true,
-  },
-  {
-    number: 3,
-    frame_start: 2127,
-    frame_end: 3186,
-    map: 'Shipyard Compact',
-    victory: true,
-  },
-  {
-    number: 4,
-    frame_start: 3204,
-    frame_end: 4383,
-    map: 'Shipyard Compact',
-    victory: false,
-  },
-  {
-    number: 5,
-    frame_start: 4413,
-    frame_end: 5736,
-    map: 'Shipyard Compact',
-    victory: false,
-  },
-  {
-    number: 6,
-    frame_start: 5847,
-    frame_end: 7137,
-    map: 'Shipyard Compact',
-    victory: false,
-  },
-  {
-    number: 7,
-    frame_start: 7176,
-    frame_end: 8328,
-    map: 'Shipyard Compact',
-    victory: false,
-  },
-  {
-    number: 8,
-    frame_start: 8370,
-    frame_end: 9423,
-    map: 'Shipyard Compact',
-    victory: true,
-  },
-  {
-    number: 9,
-    frame_start: 9444,
-    frame_end: 10306,
-    map: 'Shipyard Compact',
-    victory: false,
-  }
-]
-
-
-function cutVideos(matchObjects,videoFilename)
+var matchObjects = [{
+  number: 1,
+  filename_start: '000039.jpg',
+  frame_start: 117,
+  frame_end: 2510,
+  map: 'pachind farmlands',
+  victory: true,
+  team1: [
+    { rank: '#599', elo: '1222', name: 'Troyd' },
+    { rank: '#491', elo: '1225', name: '=Clownface' }
+  ],
+  team2: [
+    { rank: '#526', elo: '1282', name: 'Kpen' },
+    { rank: '#770', elo: 'mas', name: 'SteelRain' }
+  ]
+},{
+  number: 2,
+  filename_start: '000909.jpg',
+  frame_start: 2727,
+  frame_end: 4787,
+  map: 'jil ena nt',
+  victory: false,
+  team1: [
+    { rank: 'mag5', elo: '1255', name: 'Troyd' },
+    { rank: '#553', elo: '1204', name: 'CLARK' }
+  ],
+  team2: [
+    { rank: '#401', elo: '1279', name: 'UncleClappy' },
+    { rank: '#810', elo: '1174', name: 'espitaon' }
+  ]
+},
 {
-
-  matchObjects.forEach(function (match,index) {
-
-    if(match.frame_end)
-    {
- 
-      var start = new Date((match.frame_start-1)  * 1000).toISOString().substring(11, 19);
-      var end = new Date((match.frame_end)  * 1000).toISOString().substring(11, 19);
-    
-      console.log(start,end);
-    
-      var __dir = process.env.streamVideoDirectory+'/';
-      var __dirOutput = 'assets/videos/';
-    
-       /* var cmd = 'ffmpeg -ss '+start+' -to '+end+' -i "'+__dir+videoFilename+'" -c copy '+__dirOutput+'output_'+index+'.mp4'; // cut video
-      var exec = require('child_process').exec;
-      exec(cmd, function(err, stdout, stderr) {
-        if (err) console.log('err:\n' + err);
-        if (stderr) console.log('stderr:\n' + stderr);
-        console.log('stdout:\n' + stdout); 
-        }); 
-     */
-
-        var cmd = 'ffmpeg -ss '+start+' -i "'+__dir+videoFilename+'" -frames:v 1 -q:v 1 '+__dirOutput+'output_'+index+'_'+match.victory+'_thumbnail_raw.png'; // potential thumbnail for match up
-        var exec = require('child_process').exec;
-        exec(cmd, function(err, stdout, stderr) {
-          if (err) console.log('err:\n' + err);
-          if (stderr) console.log('stderr:\n' + stderr);
-          console.log('stdout:\n' + stdout); 
-          });
-      
-
-        }
-  });
-
-  
-    console.log('Finished Cutting All Matches');
-
-
+  number: 3,
+  filename_start: '001624.jpg',
+  frame_start: 4872,
+  frame_end: 6323,
+  map: 'torrente',
+  victory: true,
+  team1: [
+    { rank: '#5a1', elo: '1239', name: 'Troyd' },
+    { rank: '#4181278', elo: 'HankManly', name: '.' }
+  ],
+  team2: [
+    { rank: '#372', elo: '1261', name: 'John' },
+    { rank: '#686', elo: 'mes', name: 'SunkCost' }
+  ]
 }
+]
 
 
 function thumbnailCreationMechaBellum()
@@ -381,7 +317,7 @@ function thumbnailCreationMechaBellum()
 
 filename = "2024-01-10.mp4";
 
-parseVideo(filename);  // on complete rn next two commands
+//parseVideo(filename);  // on complete rn next two commands
 
 //var parsedMatchObjects = parseProcessedImagesMechabellumStart();
 //cutVideos(parsedMatchObjects,filename);

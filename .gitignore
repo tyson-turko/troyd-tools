@@ -2,4 +2,4 @@ node_modules
 assets/img/*/
 assets/videos/*
 package-lock.json
-.env
+secrets/*

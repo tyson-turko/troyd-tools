@@ -8,7 +8,7 @@ var ctrlMechabellum = require('../controllers/mechabellum');
 
 
 
-router.get('/mechabellum', ctrlMechabellum.processSingleImage); 
+//router.get('/mechabellum', ctrlMechabellum.processSingleImage); 
 
 
 module.exports = router;
