@@ -2,6 +2,10 @@
 const fsExtra = require('fs-extra');
 var fs = require('fs');
 
+const { exec } = require("child_process");
+const util  = require("util");
+const execPromise = util.promisify(exec);
+
 var video = {};
 
 video.test = function(){
@@ -12,32 +16,29 @@ video.test = function(){
 
 
 
-video.parseVideo = async function(videoFilename){
+video.prepareVideo = async function(videoFilename){
+
+    //return true;
 
     var exec = require('child_process').exec; 
-  
-    // calculate FPS of video, adjust ratio 
-  
-  
+    console.log('Started processing '+videoFilename);    
     fsExtra.emptyDirSync('assets/img/frames');
-    var cmd = 'ffmpeg -i "'+process.env.streamVideoDirectory+'/'+videoFilename+'" -q:v 1 -vf format=gray,fps=0.33333,lutyuv="y=negval:u=negval:v=negval",eq=contrast=3:saturation=3:brightness=3 assets/img/frames/%06d.jpg';
-  
-    exec(cmd, function(err, stdout, stderr) {
-      if (err) console.log('err:\n' + err);
-      if (stderr) console.log('stderr:\n' + stderr);
-      console.log('stdout:\n' + stdout);
-  });
-    console.log('I am finished?');
-  
+    // extract a frame every 3 seconds, grayscale and expose to maximize text readability
+    var cmd = 'ffmpeg -i "'+process.env.streamVideoDirectory+'/'+videoFilename+'" -q:v 1 -vf format=gray,fps=0.33333,lutyuv="y=negval:u=negval:v=negval",eq=contrast=3:saturation=3:brightness=2 assets/img/frames/%06d.jpg';
+    await execWrapper(cmd);    
+    return true;  
   
   }
 
 
 
-  video.cutMatchVideos = async function(matchObjects,videoFilename)
+  video.cutMatchVideos = async function(videoFilename,matchObjects)
   {
     var __dirOutput = 'assets/videos/';
   //  console.log(matchObjects);
+
+    if(!matchObjects)  matchObjects = require('../../assets/videos/matches.json');
+
     matchObjects.forEach(function (match,index) {
 
       /// Save match object to file
@@ -84,6 +85,15 @@ video.parseVideo = async function(videoFilename){
   }
   
   
+  async function execWrapper(cmd) {
+    const { stdout, stderr } = await execPromise(cmd);
+    if (stdout) {
+      console.log(`stderr: ${stdout}`);
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+    }
+  }
 
 
 // Add other functions as sample here

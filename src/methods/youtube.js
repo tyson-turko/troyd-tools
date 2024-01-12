@@ -171,7 +171,8 @@ function getChannel(auth) {
         console.log('The API returned an error: ' + err);
         return;
       }
-      console.log(response.data)
+      //console.log(response.data);
+    //  console.log('Upload successful');
   
       console.log('Video uploaded. Uploading the thumbnail now.')
       service.thumbnails.set({
@@ -185,7 +186,8 @@ function getChannel(auth) {
           console.log('The API returned an error: ' + err);
           return;
         }
-        console.log(response.data)
+        console.log('Upload successful');
+        //console.log(response.data)
       })
     });
   }

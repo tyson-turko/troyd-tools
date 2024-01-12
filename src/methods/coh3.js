@@ -8,7 +8,7 @@ var matchObjects = [];
 var coh3YoutubeObject = {
 
     titles: '',
-    tags:[],
+    tags:['games','coh3','company of heroes','company of heroes stream','coh stream','coh2','coh3 stream','multiplayer','coh3 wehrmacht','2v2','Company of Heroes','COH','Strategy Games','WW2 Gaming','Real Time Strategy','RTS Gaming','Military Games','Historical Gaming','War Games','Tactical Gaming','coh 3','coh 3 2v2','coh 3 build order','company of heroes 2v2','ww2 games','world war 2 games','company of heroes gameplay','rts gameplay','multiplayer strategy games','Company of heroes 3 multiplayer gameplay'],
     category: 'Gaming',
     game: 'Company of Heroes 3'
 
@@ -57,12 +57,12 @@ coh3.uploadVideostoYoutube = function ()
                 Team2String = Team2String + ' '+player.name;
             })
 
-            let title = 'CoH3 '+matchsize+'v'+matchsize+' |'+Team1String+' vs'+Team2String+' on '+matchInfo.map;
+            let title = '🍁CoH3 '+matchsize+'v'+matchsize+' |'+Team1String+' vs'+Team2String+' on '+matchInfo.map;
             videoObject = {
                 
                 title: title,
-                description: 'Test test test',
-                tags:['test','test','test4'],
+                description: 'Ranked Company of Heroes 3 Multiplayer matches streamed live by Troyd.     #coh3 #companyofheroes #strategygames',
+                tags: coh3YoutubeObject.tags,
                 videoFilePath: 'assets/videos/'+dirent.name,
                 thumbFilePath:'assets/videos/'+dirent.name.replace(/\.[^/.]+$/, "")+'_'+matchInfo.victory+'_thumbnail_raw.png',
                 publish_at: null,
@@ -89,19 +89,11 @@ coh3.identifyMatchesFromStreamImages = async function ()   ///Mechabellum Protot
 
   var matchActiveStatus = false; 
 
-  const dir = fs.opendirSync('assets/img/frames')
-  const config = {
-    lang: "eng",
-    psm: 3
-
-  }
-
-
-  
+  const dir = fs.opendirSync('assets/img/frames') 
   
   
 
-  console.log('Starting Processing of Frames Folder');
+     console.log('Starting Processing of Frames Folder');
 
     let dirent
     while ((dirent = dir.readSync()) !== null) {
@@ -125,11 +117,11 @@ coh3.identifyMatchesFromStreamImages = async function ()   ///Mechabellum Protot
                 if(text.includes("Troyd")){
         
                     matchObject = {
+                        game:'coh3',
                         number: 0,
                         filename_start: null,
                         frame_start: null,
-                        frame_end:null,
-        
+                        frame_end:null,        
                         map: null,
                         victory: false,   
                         team1: [],
